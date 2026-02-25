@@ -6,7 +6,7 @@
 	"applications": {
 		"zotero": {
 			"id": "annotation-finder@christianweihsbach.com",
-			"update_url": "",
+			"update_url": "https://github.com/chr-wei/zotero-annotation-finder/",
 			"strict_min_version": "6.99",
 			"strict_max_version": "8.9.0"
 		}
