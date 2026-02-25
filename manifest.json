@@ -2,7 +2,7 @@
 	"manifest_version": 2,
 	"name": "AnnotationFinder",
 	"version": "1.0.0",
-	"description": "A powerful tool to search and find all your Zotero annotations in one place.",
+	"description": "Find all your Zotero annotations in one place.",
 	"applications": {
 		"zotero": {
 			"id": "annotation-finder@christianweihsbach.com",
