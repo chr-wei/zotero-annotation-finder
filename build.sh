@@ -4,6 +4,7 @@
 PLUGIN_NAME="zotero_annotation_finder"
 BUILD_DIR="build"
 OUTPUT_XPI="${PLUGIN_NAME}.xpi"
+OUTPUT_ZIP="${PLUGIN_NAME}.xpi.zip"
 
 echo "Building ${OUTPUT_XPI}..."
 
@@ -34,8 +35,9 @@ done
 # Create XPI (zip)
 cd "${BUILD_DIR}"
 zip -r "../${OUTPUT_XPI}" . -x "*.DS_Store"
+zip -r "../${OUTPUT_ZIP}" . -x "*.DS_Store"
 
 cd ..
 rm -rf "${BUILD_DIR}"
 
-echo "Build complete: ${OUTPUT_XPI}"
+echo "Build complete."
