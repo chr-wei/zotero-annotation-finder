@@ -1,0 +1,213 @@
+.cs-board {
+    width: 100%;
+    height: 100%;
+    padding: 24px 32px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--material-background, #fff);
+    color: var(--fill-primary, #333);
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+.cs-header {
+    max-width: 800px;
+    margin: 0 auto 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.cs-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 20px;
+    color: var(--fill-primary, #000);
+}
+
+.cs-search-row {
+    display: flex;
+    width: 100%;
+    max-width: 600px;
+    height: 38px;
+    margin: 0 auto;
+}
+
+.cs-search-input {
+    flex: 1;
+    height: 100%;
+    padding: 0 16px;
+    border: 1px solid var(--fill-quinary, #ccc);
+    border-radius: 20px;
+    font-size: 14px;
+    background: var(--material-toolbar, #fff);
+    color: var(--fill-primary, #333);
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.cs-search-input:focus {
+    border-color: var(--color-accent, #1070e0);
+    box-shadow: 0 0 0 2px rgba(16, 112, 224, 0.1);
+}
+
+.cs-results {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.cs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+    padding-bottom: 40px;
+}
+
+.cs-count {
+    grid-column: 1 / -1;
+    font-size: 12px;
+    color: var(--fill-tertiary, #999);
+    margin: 0 0 12px 2px;
+}
+
+.cs-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--fill-quinary, #e0e0e0);
+    border-radius: 8px;
+    cursor: pointer;
+    background: var(--material-background, #fff);
+    transition: box-shadow 0.15s, border-color 0.15s;
+    overflow: hidden;
+}
+
+.cs-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: var(--fill-quaternary, #d0d0d0);
+}
+
+.cs-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: var(--material-toolbar, rgba(0, 0, 0, 0.02));
+}
+
+.cs-icon-box {
+    width: 20px;
+    height: 20px;
+    border: 1.5px solid #ccc;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.cs-icon-annot {
+    border-color: #ff00ff;
+    color: #ff00ff;
+}
+
+.cs-icon-note {
+    border-color: #ffd700;
+    color: #ffd700;
+}
+
+.cs-card-title-text {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--fill-primary, #000);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    /* Removed flex: 1 to keep page tag close */
+}
+
+.cs-page-tag {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--fill-secondary, #666);
+    background: var(--fill-quinary, #eee);
+    padding: 2px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    margin-left: auto;
+}
+
+.cs-divider {
+    height: 1px;
+    background-color: var(--fill-quinary, #eee);
+}
+
+.cs-card-body {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+}
+
+.cs-highlight-row {
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
+}
+
+.cs-color-bar {
+    width: 3px;
+    height: 1.25em;
+    border-radius: 1.5px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.cs-highlight-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--fill-primary, #000);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+}
+
+.cs-comment-row {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--fill-secondary, #555);
+    line-height: 1.4;
+    padding-left: 9px;
+}
+
+.cs-card-text-preview {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--fill-primary, #000);
+    line-height: 1.4;
+}
+
+.cs-card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 8px 12px;
+    border-top: 1px solid var(--fill-quinary, #eee);
+    background: rgba(0, 0, 0, 0.015);
+}
+
+.cs-tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    background: var(--fill-quinary, #eee);
+    color: var(--fill-secondary, #555);
+}

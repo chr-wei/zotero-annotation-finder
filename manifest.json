@@ -1,0 +1,18 @@
+{
+	"manifest_version": 2,
+	"name": "AnnotationFinder",
+	"version": "1.0.0",
+	"description": "A powerful tool to search and find all your Zotero annotations in one place.",
+	"applications": {
+		"zotero": {
+			"id": "annotation-finder@christianweihsbach.com",
+			"update_url": "",
+			"strict_min_version": "6.99",
+			"strict_max_version": "8.9.0"
+		}
+	},
+	"author": "Christian Weihsbach",
+	"icons": {
+		"64": "content/icon.svg"
+	}
+}
