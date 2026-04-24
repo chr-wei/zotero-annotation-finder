@@ -200,30 +200,13 @@ if (!AnnotationFinder) {
                         card.addEventListener('click', async () => {
                             try {
                                 if (item.type === 'annotation' && item.attachmentID) {
-                                    // Select the item in the main pane first so it doesn't steal focus later
-                                    Zotero.getMainWindow().ZoteroPane.selectItem(item.id);
-
-                                    // Open the reader (tab)
-                                    let reader = await Zotero.Reader.open(item.attachmentID);
-                                    if (reader) {
-                                        // Wait for the PDF to finish loading if necessary
-                                        if (reader._initPromise) {
-                                            await reader._initPromise;
-                                        }
-                                        
-                                        // PDF.js renders lazily, so a slight delay ensures the page/layout is ready
-                                        setTimeout(async () => {
-                                            try {
-                                                if (typeof reader.navigate === 'function') {
-                                                    await reader.navigate({ annotationKey: item.key, id: item.key });
-                                                } else {
-                                                    Zotero.Reader.open(item.attachmentID, true, { annotationKey: item.key });
-                                                }
-                                            } catch (err) {
-                                                Zotero.debug("AnnotationFinder: error in navigate timeout: " + err);
-                                            }
-                                        }, 350);
-                                    }
+                                    // Use Zotero's native method for opening an attachment and jumping to an annotation
+                                    Zotero.getMainWindow().ZoteroPane.viewAttachment(
+                                        item.attachmentID, 
+                                        null, 
+                                        false, 
+                                        { location: { annotationID: item.key } }
+                                    );
                                 } else {
                                     Zotero.getMainWindow().ZoteroPane.selectItem(item.id);
                                     Zotero.getMainWindow().Zotero_Tabs.select('zotero-pane');
