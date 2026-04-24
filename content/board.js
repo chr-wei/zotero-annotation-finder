@@ -200,12 +200,21 @@ if (!AnnotationFinder) {
                         card.addEventListener('click', async () => {
                             try {
                                 if (item.type === 'annotation' && item.attachmentID) {
+                                    // Open the reader (tab)
                                     let reader = await Zotero.Reader.open(item.attachmentID);
-                                    if (reader && reader._readerInstance) {
-                                        await reader._readerInstance.selectAnnotation(item.key);
-                                    } else {
-                                        // Fallback if _readerInstance is not ready
-                                        Zotero.Reader.open(item.attachmentID, true, { annotationKey: item.key });
+                                    if (reader) {
+                                        // Wait for the PDF to finish loading if necessary
+                                        if (reader._initPromise) {
+                                            await reader._initPromise;
+                                        }
+                                        
+                                        // Use the official Zotero 7 navigate API
+                                        if (typeof reader.navigate === 'function') {
+                                            await reader.navigate({ annotationKey: item.key });
+                                        } else {
+                                            // Fallback for older Zotero versions
+                                            Zotero.Reader.open(item.attachmentID, true, { annotationKey: item.key });
+                                        }
                                     }
                                 } else {
                                     Zotero.getMainWindow().ZoteroPane.selectItem(item.id);
