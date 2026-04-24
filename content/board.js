@@ -235,91 +235,35 @@ if (!AnnotationFinder) {
             if (!query) return [];
             let out = [];
             let seen = new Set();
-            let lowerQuery = query.toLowerCase();
 
             try {
-                // Direct annotation and note search (fast)
+                // Direct annotation and note search
                 let s = new Zotero.Search();
                 s.addCondition('joinMode', 'any');
                 s.addCondition('annotationText', 'contains', query);
                 s.addCondition('annotationComment', 'contains', query);
                 s.addCondition('tag', 'contains', query);
                 s.addCondition('note', 'contains', query);
-                s.addCondition('title', 'contains', query); // Catches note titles and items with matching titles
+                s.addCondition('title', 'contains', query); // Catches note titles
                 let allIds = await s.search();
 
                 for (let id of allIds) {
                     let item = Zotero.Items.get(id);
                     if (!item || seen.has(id)) continue;
 
-                    // Support both isAnnotation() and itemType check
-                    const isAnnot = (item.isAnnotation && item.isAnnotation()) || item.itemType === 'annotation';
-
-                    // Notes
                     if (item.isNote()) {
-                        seen.add(id);
-                        let parentTitle = null;
-                        if (item.parentItemID) {
-                            let parent = Zotero.Items.get(item.parentItemID);
-                            if (parent) parentTitle = parent.getDisplayTitle();
-                        }
-                        out.push({
-                            id: item.id,
-                            type: 'note',
-                            title: item.getNoteTitle() || 'Untitled Note',
-                            parentTitle: parentTitle,
-                            text: item.getNote() || '',
-                            tags: item.getTags().map(t => t.tag)
-                        });
-                    }
-                    // Annotations
-                    else if (isAnnot) {
+                        this._addNote(item, out, seen);
+                    } else if (item.isAnnotation?.() || item.itemType === 'annotation') {
                         this._addAnnotation(item, out, seen);
-                    }
-                    // Attachments — check child annotations
-                    else if (item.isAttachment && item.isAttachment()) {
-                        this._collectChildAnnotations(item, query, lowerQuery, out, seen);
-                    }
-                    // Regular items — check child notes + search attachments
-                    else if (item.isRegularItem && item.isRegularItem()) {
-                        // Child notes
-                        let noteIDs = item.getNotes();
-                        for (let noteID of noteIDs) {
-                            if (seen.has(noteID)) continue;
-                            let note = Zotero.Items.get(noteID);
-                            if (!note) continue;
-                            let noteContent = note.getNote() || '';
-                            let noteTitle = note.getNoteTitle() || 'Untitled Note';
-                            let stripped = noteContent.replace(/<[^>]*>/g, '').toLowerCase();
-                            if (stripped.includes(lowerQuery) || noteTitle.toLowerCase().includes(lowerQuery)) {
-                                seen.add(noteID);
-                                out.push({
-                                    id: note.id,
-                                    type: 'note',
-                                    title: noteTitle,
-                                    parentTitle: item.getDisplayTitle(),
-                                    text: noteContent,
-                                    tags: note.getTags().map(t => t.tag)
-                                });
-                            }
-                        }
-                        // Child attachments
-                        let attIDs = item.getAttachments();
-                        for (let attID of attIDs) {
-                            let att = Zotero.Items.get(attID);
-                            if (att) this._collectChildAnnotations(att, query, lowerQuery, out, seen);
-                        }
                     }
                 }
                 return out;
-                
             } catch (e) {
                 Zotero.debug("AnnotationFinder: Search error: " + e);
                 return [];
             }
         },
 
-        // Extract a single annotation item into a result entry
         _addAnnotation(item, out, seen) {
             if (seen.has(item.id)) return;
             seen.add(item.id);
@@ -327,23 +271,14 @@ if (!AnnotationFinder) {
             let parentTitle = null;
             try {
                 let attachment = Zotero.Items.get(item.parentItemID);
-                if (attachment && attachment.parentItemID) {
-                    let topLevel = Zotero.Items.get(attachment.parentItemID);
-                    if (topLevel) parentTitle = topLevel.getDisplayTitle();
-                } else if (attachment) {
+                if (attachment) {
                     parentTitle = attachment.getDisplayTitle();
+                    if (attachment.parentItemID) {
+                        let topLevel = Zotero.Items.get(attachment.parentItemID);
+                        if (topLevel) parentTitle = topLevel.getDisplayTitle();
+                    }
                 }
             } catch (e) { }
-
-            let highlight = '';
-            let comment = '';
-            try {
-                highlight = (item.getField ? item.getField('annotationText') : null) || item.annotationText || '';
-                comment = (item.getField ? item.getField('annotationComment') : null) || item.annotationComment || '';
-            } catch (e) {
-                highlight = item.annotationText || '';
-                comment = item.annotationComment || '';
-            }
 
             out.push({
                 id: item.id,
@@ -352,8 +287,8 @@ if (!AnnotationFinder) {
                 type: 'annotation',
                 title: parentTitle || 'Annotation',
                 parentTitle: parentTitle,
-                highlight: highlight,
-                comment: comment,
+                highlight: item.annotationText || '',
+                comment: item.annotationComment || '',
                 tags: item.getTags().map(t => t.tag),
                 color: item.annotationColor || '#ff00ff',
                 pageLabel: item.annotationPageLabel || ''
@@ -378,30 +313,9 @@ if (!AnnotationFinder) {
                 type: 'note',
                 title: item.getDisplayTitle() || 'Note',
                 parentTitle: parentTitle,
-                text: item.getNote(),
+                text: item.getNote() || '',
                 tags: item.getTags().map(t => t.tag)
             });
-        },
-
-        // Walk child annotations of an attachment and add matches
-        _collectChildAnnotations(attachment, query, lowerQuery, out, seen) {
-            try {
-                let annotIDs = attachment.getAnnotations ? attachment.getAnnotations() : [];
-                for (let annot of annotIDs) {
-                    let annotItem = typeof annot === 'number' ? Zotero.Items.get(annot) : annot;
-                    if (!annotItem || seen.has(annotItem.id)) continue;
-
-                    let text = ((annotItem.getField ? annotItem.getField('annotationText') : null) || annotItem.annotationText || '').toLowerCase();
-                    let comment = ((annotItem.getField ? annotItem.getField('annotationComment') : null) || annotItem.annotationComment || '').toLowerCase();
-                    let hasTag = annotItem.getTags().some(t => t.tag.toLowerCase().includes(lowerQuery));
-
-                    if (text.includes(lowerQuery) || comment.includes(lowerQuery) || hasTag) {
-                        this._addAnnotation(annotItem, out, seen);
-                    }
-                }
-            } catch (e) {
-                Zotero.debug("AnnotationFinder: Error scanning annotations: " + e);
-            }
         }
     };
 }
