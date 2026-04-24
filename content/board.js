@@ -200,6 +200,9 @@ if (!AnnotationFinder) {
                         card.addEventListener('click', async () => {
                             try {
                                 if (item.type === 'annotation' && item.attachmentID) {
+                                    // Select the item in the main pane first so it doesn't steal focus later
+                                    Zotero.getMainWindow().ZoteroPane.selectItem(item.id);
+
                                     // Open the reader (tab)
                                     let reader = await Zotero.Reader.open(item.attachmentID);
                                     if (reader) {
@@ -216,8 +219,6 @@ if (!AnnotationFinder) {
                                                 } else {
                                                     Zotero.Reader.open(item.attachmentID, true, { annotationKey: item.key });
                                                 }
-                                                // Selecting the item in the pane also forces the sidebar to focus and can trigger navigation
-                                                Zotero.getMainWindow().ZoteroPane.selectItem(item.id);
                                             } catch (err) {
                                                 Zotero.debug("AnnotationFinder: error in navigate timeout: " + err);
                                             }
