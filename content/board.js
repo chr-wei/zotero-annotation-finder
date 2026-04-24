@@ -197,15 +197,22 @@ if (!AnnotationFinder) {
                             card.appendChild(tagsDiv);
                         }
 
-                        card.addEventListener('click', () => {
+                        card.addEventListener('click', async () => {
                             try {
                                 if (item.type === 'annotation' && item.attachmentID) {
-                                    Zotero.Reader.open(item.attachmentID, 0, { annotationKey: item.key });
+                                    let reader = await Zotero.Reader.open(item.attachmentID);
+                                    if (reader && reader._readerInstance) {
+                                        await reader._readerInstance.selectAnnotation(item.key);
+                                    } else {
+                                        // Fallback if _readerInstance is not ready
+                                        Zotero.Reader.open(item.attachmentID, true, { annotationKey: item.key });
+                                    }
                                 } else {
                                     Zotero.getMainWindow().ZoteroPane.selectItem(item.id);
                                     Zotero.getMainWindow().Zotero_Tabs.select('zotero-pane');
                                 }
                             } catch (e) {
+                                Zotero.debug("AnnotationFinder: error navigating: " + e);
                             }
                         });
                         results.appendChild(card);
@@ -231,20 +238,15 @@ if (!AnnotationFinder) {
             let lowerQuery = query.toLowerCase();
 
             try {
-                // 1) Quicksearch
+                // Direct annotation and note search (fast)
                 let s = new Zotero.Search();
-                s.addCondition('quicksearch-fields', 'contains', query);
-                let ids = await s.search();
-
-                // 2) Direct annotation search
-                let s2 = new Zotero.Search();
-                s2.addCondition('joinMode', 'any');
-                s2.addCondition('annotationText', 'contains', query);
-                s2.addCondition('annotationComment', 'contains', query);
-                s2.addCondition('tag', 'contains', query);
-                let annotIds = await s2.search();
-
-                let allIds = [...new Set([...ids, ...annotIds])];
+                s.addCondition('joinMode', 'any');
+                s.addCondition('annotationText', 'contains', query);
+                s.addCondition('annotationComment', 'contains', query);
+                s.addCondition('tag', 'contains', query);
+                s.addCondition('note', 'contains', query);
+                s.addCondition('title', 'contains', query); // Catches note titles and items with matching titles
+                let allIds = await s.search();
 
                 for (let id of allIds) {
                     let item = Zotero.Items.get(id);
