@@ -208,13 +208,20 @@ if (!AnnotationFinder) {
                                             await reader._initPromise;
                                         }
                                         
-                                        // Use the official Zotero 7 navigate API
-                                        if (typeof reader.navigate === 'function') {
-                                            await reader.navigate({ annotationKey: item.key });
-                                        } else {
-                                            // Fallback for older Zotero versions
-                                            Zotero.Reader.open(item.attachmentID, true, { annotationKey: item.key });
-                                        }
+                                        // PDF.js renders lazily, so a slight delay ensures the page/layout is ready
+                                        setTimeout(async () => {
+                                            try {
+                                                if (typeof reader.navigate === 'function') {
+                                                    await reader.navigate({ annotationKey: item.key, id: item.key });
+                                                } else {
+                                                    Zotero.Reader.open(item.attachmentID, true, { annotationKey: item.key });
+                                                }
+                                                // Selecting the item in the pane also forces the sidebar to focus and can trigger navigation
+                                                Zotero.getMainWindow().ZoteroPane.selectItem(item.id);
+                                            } catch (err) {
+                                                Zotero.debug("AnnotationFinder: error in navigate timeout: " + err);
+                                            }
+                                        }, 350);
                                     }
                                 } else {
                                     Zotero.getMainWindow().ZoteroPane.selectItem(item.id);
